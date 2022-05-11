@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model State {
+  id     Int    @default(autoincrement())
+  postal String @unique
+  fips   Int    @unique
+  census Int    @unique
+  icpsr  Int    @unique
+  name   String @unique
+
+
+  election Election[]
+  @@id([id, postal, fips, census, icpsr, name])
+}
+
+model ElectionType {
+  id       Int        @id @default(autoincrement())
+  name     String     @unique
+  election Election[]
+}
+
+model Return {
+  id Int @id @default(autoincrement())
+}
+
+model Election {
+  id             Int          @id @default(autoincrement())
+  year           Int
+  state          State        @relation(fields: [postal], references: [postal])
+  postal         String
+  type           ElectionType @relation(fields: [electionTypeId], references: [id])
+  electionTypeId Int
+  totalVotes     Int
+}

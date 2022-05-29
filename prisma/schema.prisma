@@ -29,16 +29,38 @@ model ElectionType {
   election Election[]
 }
 
+model Candidate {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  nickName  String
+  Return    Return[]
+}
+
 model Return {
-  id Int @id @default(autoincrement())
+  id              Int               @id @default(autoincrement())
+  candidate       Candidate         @relation(fields: [candidateId], references: [id])
+  candidateId     Int
+  votes           Int
+  percent         Decimal
+  ElectionReturns ElectionReturns[]
 }
 
 model Election {
-  id             Int          @id @default(autoincrement())
-  year           Int
-  state          State        @relation(fields: [postal], references: [postal])
-  postal         String
-  type           ElectionType @relation(fields: [electionTypeId], references: [id])
-  electionTypeId Int
-  totalVotes     Int
+  id              Int               @id @default(autoincrement())
+  year            Int
+  state           State             @relation(fields: [postal], references: [postal])
+  postal          String
+  type            ElectionType      @relation(fields: [electionTypeId], references: [id])
+  electionTypeId  Int
+  totalVotes      Int
+  ElectionReturns ElectionReturns[]
+}
+
+model ElectionReturns {
+  id         Int      @id @default(autoincrement())
+  election   Election @relation(fields: [electionId], references: [id])
+  electionId Int
+  return     Return   @relation(fields: [returnId], references: [id])
+  returnId   Int
 }

@@ -1,5 +1,5 @@
 import { PresidentResultRow } from "./seedtypes";
-import seedCommon from "./commondata";
+import seedCommon, { loadPresidentialData } from "./common";
 import seedPresident from "./presidentialdata"
 
-export { type PresidentResultRow, seedCommon, seedPresident }
+export { type PresidentResultRow, seedCommon, seedPresident, loadPresidentialData }

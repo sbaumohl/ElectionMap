@@ -24,8 +24,7 @@ model State {
 }
 
 model ElectionType {
-  id       Int        @id @default(autoincrement())
-  name     String     @unique
+  name     String     @id @unique
   election Election[]
 }
 
@@ -51,8 +50,8 @@ model Election {
   year            Int
   state           State             @relation(fields: [postal], references: [postal])
   postal          String
-  type            ElectionType      @relation(fields: [electionTypeId], references: [id])
-  electionTypeId  Int
+  type            ElectionType      @relation(fields: [electionType], references: [name])
+  electionType    String
   totalVotes      Int
   ElectionReturns ElectionReturns[]
 }

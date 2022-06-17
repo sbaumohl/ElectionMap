@@ -1,12 +1,15 @@
 import { PrismaClient, State } from "@prisma/client";
-import { seedCommon, seedPresident } from "./scripts";
+import { loadPresidentialData, seedCommon, seedPresident } from "./scripts";
 
 const prisma = new PrismaClient();
 
 async function main() {
 	console.log("Starting...")
-	await seedCommon(prisma);
-	await seedPresident(prisma);
+
+	let presidentialData = await loadPresidentialData();
+
+	await seedCommon(prisma, presidentialData);
+	await seedPresident(prisma, presidentialData);
 }
 
 main()

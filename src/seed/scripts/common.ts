@@ -4,7 +4,37 @@ import * as fs from "fs";
 import * as path from "path";
 import { PresidentResultRow } from "./seedtypes";
 
-export default async function seedCommon(client: PrismaClient) {
+
+export default async function seedCommon(client: PrismaClient, data: PresidentResultRow[]) {
+	let presidentData: PresidentResultRow[] = await loadPresidentialData()
+
+	let states = presidentData.map((val: PresidentResultRow) => ({
+		postal: val.state_po,
+		fips: val.state_fips,
+		census: val.state_cen,
+		icpsr: val.state_ic,
+		name: val.state,
+	})).reduce((acc, current) => {
+		const stateCodes = acc.map(val => val.name)
+		if (!stateCodes.includes(current.name)) {
+			acc.push(current)
+		}
+		return acc;
+	}, [] as Partial<State>[])
+
+
+	await client.state.createMany({
+		data: states as any[],
+		skipDuplicates: true,
+	});
+
+	await client.electionType.createMany({
+		data: [{ name: "US PRESIDENT" }],
+        skipDuplicates: true
+	});
+}
+
+export async function loadPresidentialData(): Promise<PresidentResultRow[]> {
 	const presidentFilePath = path.resolve(
 		__dirname,
 		"../data/1976-2020-president.csv"
@@ -12,7 +42,8 @@ export default async function seedCommon(client: PrismaClient) {
 	const presidentFileContent = fs.readFileSync(presidentFilePath, {
 		encoding: "utf-8",
 	});
-	let presidentData: PresidentResultRow[] = await new Promise<PresidentResultRow[]>((resolve, reject) => {
+
+	return new Promise<PresidentResultRow[]>((resolve, reject) => {
 		parse(
 			presidentFileContent,
 			{ delimiter: "," },
@@ -43,29 +74,4 @@ export default async function seedCommon(client: PrismaClient) {
 			}
 		);
 	})
-
-	let states = presidentData.map((val: PresidentResultRow) => ({
-		postal: val.state_po,
-		fips: val.state_fips,
-		census: val.state_cen,
-		icpsr: val.state_ic,
-		name: val.state,
-	})).reduce((acc, current) => {
-		const stateCodes = acc.map(val => val.name)
-		if (!stateCodes.includes(current.name)) {
-			acc.push(current)
-		}
-		return acc;
-	}, [] as Partial<State>[])
-
-
-	await client.state.createMany({
-		data: states as any[],
-		skipDuplicates: true,
-	});
-
-	await client.electionType.createMany({
-		data: [{ name: "US PRESIDENT" }],
-        skipDuplicates: true
-	});
 }
